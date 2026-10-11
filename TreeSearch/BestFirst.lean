@@ -6,6 +6,11 @@ open Batteries
 namespace TreeSearch
 
 public meta section
+
+/-- Order heap entries by priority only. -/
+private instance : Ord (Float × Nat) where
+  compare a b := if a.1 < b.1 then .lt else if b.1 < a.1 then .gt else .eq
+
 variable {m : Type → Type} [Monad m] {σ ε : Type}
 
 def BestFirst.defaultMaxNodes : Nat := 64
@@ -15,7 +20,7 @@ def bestFirstSearch (priority : σ → m Float)
     (maxNodes := BestFirst.defaultMaxNodes)
     : m (Option Nat × Array (Node σ (ε × Nat))) := do
   let mut nodes := #[ { data := start } ]
-  let mut heap := BinaryHeap.singleton (fun a b => a.fst < b.fst) (0.0, 0)
+  let mut heap := BinaryHeap.singleton ((0.0, 0) : Float × Nat)
 
   while heap.size <= maxNodes do
     match heap.max with
